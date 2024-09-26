@@ -1,0 +1,81 @@
+%%capture
+!pip install googletrans==3.1.0a0
+
+
+# türkçeden ingilizceye çeviri
+
+from googletrans import Translator
+
+# Çevirici nesnesi oluştur
+translator = Translator()
+
+# Türkçe metin
+turkish_text = "Merhaba, nasılsın? Bugün hava çok güzel."
+
+# Türkçe'den İngilizce'ye çeviri yap
+translated = translator.translate(turkish_text, src='tr', dest='en')
+
+# Çevirilen metni yazdır
+print("Orijinal Türkçe metin: ", turkish_text)
+print("Çevrilmiş İngilizce metin: ", translated.text)
+
+
+
+#türkçe duygu analizi
+from textblob import TextBlob
+from googletrans import Translator
+
+# Çevirici nesnesi oluştur
+translator = Translator()
+
+def duygu_analizi(metin):
+    # TextBlob nesnesi oluştur
+    blob = TextBlob(metin)
+
+    # Duygu analizi sonucunu al
+    duygu_sonucu = blob.sentiment
+
+    # Polarity (duygu durumu) ve subjectivity (öznelik) puanları
+    print(f"Metin: {metin}")
+    print(f"Duygu Puanı (Polarity): {duygu_sonucu.polarity}")
+    print(f"Öznelik Puanı (Subjectivity): {duygu_sonucu.subjectivity}")
+
+    if duygu_sonucu.polarity > 0:
+        print("Duygu durumu: Pozitif")
+    elif duygu_sonucu.polarity < 0:
+        print("Duygu durumu: Negatif")
+    else:
+        print("Duygu durumu: Nötr")
+
+while True:
+    metin = input("Bir metin girin (Çıkmak için 'q' tuşuna basın): ")
+
+    # Türkçe'den İngilizce'ye çeviri yap
+    translated = translator.translate(metin, src='tr', dest='en')
+
+    if metin.lower() == 'q':
+        break
+
+    duygu_analizi(translated.text)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

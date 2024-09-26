@@ -1,0 +1,91 @@
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+# Örnek belgeler
+documents = [
+    "Kedi evcil bir hayvandır.",
+    "Köpekler evcil ve sadık hayvanlardır.",
+    "Kedi ve köpekler evcil hayvanlardır."
+]
+
+# TF-IDF vektörleştirici oluştur
+vectorizer = TfidfVectorizer()
+
+# Belgeler üzerinde TF-IDF hesapla
+tfidf_matrix = vectorizer.fit_transform(documents)
+
+# Özellik adlarını (kelimeleri) al
+feature_names = vectorizer.get_feature_names_out()
+
+# TF-IDF matrisini dense formata çevir ve Pandas DataFrame'e aktar
+import pandas as pd
+
+df = pd.DataFrame(tfidf_matrix.toarray(), columns=feature_names)
+
+print("TF-IDF Matrisi:")
+print(df)
+
+
+
+%%capture
+!pip install scikit-learn pandas nltk transformers datasets
+
+
+import pandas as pd
+from datasets import load_dataset
+
+# Örnek veri seti (Her bir satırda bir metin ve o metnin duygu etiketi var)
+data = load_dataset("winvoker/turkish-sentiment-analysis-dataset")
+data = data.remove_columns(["dataset"])
+# Örneğin eğitim kümesine (train) erişim sağlayalım
+train_data = data['train']  # Eğitim verisi
+
+
+
+import string
+import nltk
+from nltk.corpus import stopwords
+
+# Stop words ve noktalama işaretlerini temizleyen fonksiyon
+def clean_text(text):
+    stop_words = set(stopwords.words('turkish'))
+    text = text.translate(str.maketrans('', '', string.punctuation))  # Noktalama işaretlerini çıkar
+    return ' '.join([word for word in text.split() if word.lower() not in stop_words])  # Stop words'leri çıkar
+
+# `datasets` yapısında .map fonksiyonunu kullanarak temizlik işlemini uygula
+nltk.download('stopwords')
+
+# Eğitim verisini temizleme
+train_data = train_data.map(lambda x: {'text': clean_text(x['text'])})
+
+
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+# TF-IDF vektörleştirici oluşturma
+tfidf = TfidfVectorizer(max_features=1000)  # En çok geçen 1000 kelimeye odaklanıyoruz
+
+# TF-IDF matrisini oluşturma
+X = tfidf.fit_transform(train_data['text'])
+
+# TF-IDF sonuçlarını DataFrame olarak görüntüleme
+tfidf_df = pd.DataFrame(X.toarray(), columns=tfidf.get_feature_names_out())
+#print(tfidf_df)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

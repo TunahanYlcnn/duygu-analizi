@@ -1,0 +1,79 @@
+!pip install transformers datasets torch
+
+from huggingface_hub import login
+login("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")
+
+from transformers import AutoTokenizer, AutoModelForSequenceClassification, Trainer, TrainingArguments
+from datasets import load_dataset
+import torch
+import numpy as np
+from sklearn.metrics import accuracy_score, precision_recall_fscore_support
+
+# Modeli 3 sınıflı olarak yükleyin
+model = AutoModelForSequenceClassification.from_pretrained("savasy/bert-base-turkish-sentiment-cased", num_labels=3, ignore_mismatched_sizes=True)
+
+# Tokenizer'ı yükleyin
+tokenizer = AutoTokenizer.from_pretrained("savasy/bert-base-turkish-sentiment-cased")
+
+# Veri setini yükleyin
+dataset = load_dataset("winvoker/turkish-sentiment-analysis-dataset")
+dataset = dataset.remove_columns(["dataset"])
+
+# Etiketleri sayısal değerlere çeviren bir haritalama
+label_mapping = {
+    "Negative": 0,
+    "Notr": 1,
+    "Positive": 2
+}
+
+# Tokenizasyon işlemi
+def tokenize_function(examples):
+    return tokenizer(examples['text'], padding="max_length", truncation=True)
+
+# Veri setini tokenize etme
+tokenized_train = dataset['train'].map(tokenize_function, batched=True)
+tokenized_test = dataset['test'].map(tokenize_function, batched=True)
+
+# Etiketleri sayısal değerlere dönüştürme fonksiyonu
+def encode_labels(example):
+    example['label'] = label_mapping[example['label']]
+    return example
+
+# Eğitim ve test veri setlerinde etiketleri dönüştürme
+tokenized_train = tokenized_train.map(encode_labels)
+tokenized_test = tokenized_test.map(encode_labels)
+
+# Metrik hesaplamaları için fonksiyon
+def compute_metrics(p):
+    preds = np.argmax(p.predictions, axis=1)
+    precision, recall, f1, _ = precision_recall_fscore_support(p.label_ids, preds, average='weighted')
+    acc = accuracy_score(p.label_ids, preds)
+    return {"accuracy": acc, "f1": f1, "precision": precision, "recall": recall}
+
+# GPU kullanımını doğrulama
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+model.to(device)
+print(f"Model will be trained on: {device}")
+
+# Eğitim ayarlarını belirleyelim
+training_args = TrainingArguments(
+    output_dir="./results",
+    eval_strategy="epoch",
+    learning_rate=2e-5,
+    per_device_train_batch_size=8,
+    per_device_eval_batch_size=8,
+    num_train_epochs=3,
+    logging_dir="./logs",
+)
+
+# Trainer API'si
+trainer = Trainer(
+    model=model,
+    args=training_args,
+    train_dataset=tokenized_train,
+    eval_dataset=tokenized_test,
+    compute_metrics=compute_metrics
+)
+
+# Modeli eğitme işlemini başlatın
+trainer.train()

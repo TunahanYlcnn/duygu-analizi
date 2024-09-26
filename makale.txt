@@ -1,0 +1,96 @@
+%%capture
+!pip install nltk datasets newspaper3k re bs4 requests
+!pip install newspaper3k
+import nltk
+from nltk import pos_tag
+from nltk.probability import FreqDist
+from newspaper import Article, fulltext
+import requests, string
+
+
+
+nltk.download('punkt')
+nltk.download('maxent_ne_chunker')
+
+
+
+from newspaper import Article
+
+url = 'https://www.sozcu.com.tr/umit-milli-futbol-takimi-san-marino-yu-deplasmanda-6-1-lik-skorla-gecti-p83029'
+article = Article(url)
+
+# Makaleyi indir ve ayrıştır
+article.download()
+article.parse()
+
+print(article.title)
+print("*********")
+print(article.text)
+
+
+# makalenin yazısının nokt işaret kaldırıp büyük harfleri küçük harf yapıp yazdırma
+
+metin = article.text.translate(str.maketrans('', '', string.punctuation)).translate(str.maketrans('ABCDEFGHIJKLMNOPQRSŞTUÜVWXYZ', 'abcdefghijklmnopqrsştuüvwxyz')).translate(str.maketrans('', '', '0123456789')).split()
+kelimeler = ' '.join(metin)
+print(kelimeler)
+
+
+from nltk.corpus import stopwords
+nltk.download('stopwords')
+
+# Stop words'leri metinden çıkar
+temiz_metin = [kelime for kelime in kelimeler.split() if kelime not in stopwords.words('turkish')]
+
+# Stop words kaldırıldıktan sonra kelimeleri birleştir
+temiz_metin_str = ' '.join(temiz_metin)
+
+# Sonucu ekrana yazdır
+print(temiz_metin_str)
+
+
+kelimeler = nltk.word_tokenize(temiz_metin_str)
+sayac = 0
+for kelime in kelimeler:
+  if "ise" == kelime:
+    sayac += 1
+sayac
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

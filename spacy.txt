@@ -1,0 +1,22 @@
+import spacy
+
+from spacytextblob.spacytextblob import SpacyTextBlob
+# Load en_core_web_sm model
+
+nlp = spacy.load("en_core_web_sm")
+
+# Add TextBlob to spaCy pipeline
+
+nlp.add_pipe("spacytextblob")
+
+text = "you are very happy"
+doc = nlp(text)
+
+# Get polarity and subjectivity
+
+polarity = doc._.blob.polarity
+
+subjectivity = doc._.blob.subjectivity
+print("Polarity:", polarity)
+
+print("Subjectivity:", subjectivity)
