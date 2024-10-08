@@ -1,0 +1,24 @@
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+df=pd.read_csv('/kaggle/input/audi-a1-listings/Audi_A1_listings.csv')
+df=df.drop(columns=['index','href','MileageRank','PriceRank','PPYRank','Score','PPY']) #sütun kaldırma
+#df.head(3)
+
+df.columns=["yil","kasa","mil","motor","ps","vites","yakit","sahip","fiyat"] #sütun ismi değiştirme
+df['motor']=df['motor'].str.replace("L","")
+df['motor']=pd.to_numeric(df['motor'])
+#df.head(3)
+
+df=pd.get_dummies(df,columns=['kasa','vites','yakit'],drop_first=True) #dummies:kategorik değişkenleri sayısal sütunlara dönüştürmek için kullanılır. 
+#drop_first:Bu parametre, bir kategorik değişkenin ilk kategorisini çıkarmayı sağlar.
+#df.head(3)
+
+y = df[['fiyat']]  # Bağımlı değişken (target variable)
+x = df.drop("fiyat", axis=1)  # Bağımsız değişkenler (features)
+
+lm = LinearRegression()  # Linear Regression modelini oluşturma
+model = lm.fit(x, y)     # Modeli verilerle eğitme
+
+model.predict([[2017,30000,1.6,110,1,0,1]])  # Yeni bir veri ile tahmin yapma
+
+model.score(x,y)# skorunu hesapladı ideal > 95
