@@ -2,23 +2,16 @@ from transformers import TFAutoModelForSequenceClassification, AutoTokenizer
 import numpy as np
 import tensorflow as tf  # TensorFlow'u softmax için kullanacağız
 
-# Load pre-trained BERT model and tokenizer
 model = TFAutoModelForSequenceClassification.from_pretrained("nlptown/bert-base-multilingual-uncased-sentiment")
 tokenizer = AutoTokenizer.from_pretrained("nlptown/bert-base-multilingual-uncased-sentiment")
 
-
-# Define text
 text = "ı am not happy"
 
-# Tokenize and encode text
 encoded_input = tokenizer(text, return_tensors="tf")
 
-# Pass input to model
 output = model(encoded_input)
 
-# Take softmax of output using TensorFlow
 scores = tf.nn.softmax(output[0], axis=1)
 
-# Print sentiment scores
 print("\nPositive:", scores[0][4].numpy())  # Pozitif duygu için sınıf 4 olmalı
 print("Negative:", scores[0][0].numpy())  # Negatif duygu için sınıf 0 olmalı
